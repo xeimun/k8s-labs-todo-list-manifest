@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: todo-list
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # 1. 어떤 Git 저장소에 있는 Helm 차트를 쓸 것인가?
+    repoURL: 'https://github.com/xeimun/k8s-labs-v1.git'
+    targetRevision: 'main' # 그 저장소의 main 브랜치를 사용
+    path: 'apps/todo-list/backend/helm/todo-list-chart' # 저장소 안의 차트 경로
+    # 2. 이 Helm 차트에 어떤 특별한 값을 전달할 것인가?
+    helm:
+      parameters:
+        - name: 'image.tag'
+          value: 'latest' # CI 파이프라인이 바로 이 'value'를 업데이트할 것임
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: 'default' # 배포 대상 네임스페이스
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
